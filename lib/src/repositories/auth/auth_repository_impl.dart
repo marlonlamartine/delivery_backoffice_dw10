@@ -16,7 +16,7 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final result = await _dio.unauth().post(
         '/auth',
-        data: {'email': email, 'password': password, 'admin': 'true'},
+        data: {'email': email, 'password': password, 'admin': true},
       );
 
       return AuthModel.fromMap(result.data);

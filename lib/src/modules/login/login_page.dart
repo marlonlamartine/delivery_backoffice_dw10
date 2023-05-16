@@ -26,23 +26,26 @@ class _LoginPageState extends State<LoginPage> with Loader, Messages {
 
   @override
   void initState() {
-    statusReactionDisposer = reaction((_) => controller.loginStatus, (status) {
-      switch (status) {
-        case LoginstateStatus.initial:
-          break;
-        case LoginstateStatus.loading:
-          showLoader();
-          break;
-        case LoginstateStatus.success:
-          hideLoader();
-          Modular.to.navigate('/');
-          break;
-        case LoginstateStatus.error:
-          hideLoader();
-          showError(controller.errorMessage ?? 'Erro');
-          break;
-      }
-    });
+    statusReactionDisposer = reaction(
+      (_) => controller.loginStatus,
+      (status) {
+        switch (status) {
+          case LoginstateStatus.initial:
+            break;
+          case LoginstateStatus.loading:
+            showLoader();
+            break;
+          case LoginstateStatus.success:
+            hideLoader();
+            Modular.to.navigate('/');
+            break;
+          case LoginstateStatus.error:
+            hideLoader();
+            showError(controller.errorMessage ?? 'Erro');
+            break;
+        }
+      },
+    );
     super.initState();
   }
 
@@ -50,7 +53,15 @@ class _LoginPageState extends State<LoginPage> with Loader, Messages {
   void dispose() {
     emailEC.dispose();
     passwordEC.dispose();
+    statusReactionDisposer();
     super.dispose();
+  }
+
+  void _formSubmit() {
+    final formValid = formKey.currentState?.validate() ?? false;
+    if (formValid) {
+      controller.login(emailEC.text, passwordEC.text);
+    }
   }
 
   @override
@@ -116,6 +127,7 @@ class _LoginPageState extends State<LoginPage> with Loader, Messages {
                         const SizedBox(height: 20),
                         TextFormField(
                           controller: emailEC,
+                          onFieldSubmitted: (_) => _formSubmit(),
                           decoration:
                               const InputDecoration(labelText: 'E-mail'),
                           validator: Validatorless.multiple([
@@ -126,6 +138,7 @@ class _LoginPageState extends State<LoginPage> with Loader, Messages {
                         const SizedBox(height: 20),
                         TextFormField(
                           controller: passwordEC,
+                          onFieldSubmitted: (_) => _formSubmit(),
                           obscureText: true,
                           decoration: const InputDecoration(labelText: 'Senha'),
                           validator:
@@ -136,13 +149,7 @@ class _LoginPageState extends State<LoginPage> with Loader, Messages {
                           width: double.infinity,
                           height: 50,
                           child: ElevatedButton(
-                            onPressed: () {
-                              final formValid =
-                                  formKey.currentState?.validate() ?? false;
-                              if (formValid) {
-                                controller.login(emailEC.text, passwordEC.text);
-                              }
-                            },
+                            onPressed: _formSubmit,
                             child: const Text('Entrar'),
                           ),
                         ),
